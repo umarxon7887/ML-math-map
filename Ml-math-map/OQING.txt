@@ -1,0 +1,13 @@
+ML MATEMATIKA ILOVASI (PWA)
+
+1) Saytga joylash (bepul, 1 daqiqa):
+   - https://app.netlify.com/drop ga kiring va shu papkani (yoki zip ichidagi hamma fayllarni) sudrab tashlang.
+   - Tayyor havola beriladi. Uni Telegram guruhga yuboring.
+
+2) Telefonga o'rnatish:
+   - Android (Chrome): havolani oching, menyu (3 nuqta) -> "Install app" / "Ilovani o'rnatish".
+   - iPhone (Safari): Share -> "Add to Home Screen".
+
+3) Har kimning natijasi alohida: belgilar faqat o'sha odamning telefon/brauzerida saqlanadi.
+
+4) APK kerak bo'lsa: havolani https://www.pwabuilder.com ga kiriting -> Android -> Download.

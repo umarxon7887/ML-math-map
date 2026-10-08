@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#16243A">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>ML uchun matematika yo'l xaritasi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#EEF2F5; --grid:#DCE4EB; --card:#FFFFFF; --ink:#16243A; --mute:#566679; --line:#C9D4DE;
+  --r:#B9352E; --y:#9A6504; --g:#1E7550;
+  --rb:#FBE7E5; --yb:#FBF0D3; --gb:#DCF1E6;
+  --acc:#2A52D4; --accb:#E4EAFC;
+  --head:"Bricolage Grotesque","Onest",system-ui,sans-serif;
+  --body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1822; --grid:#182432; --card:#162130; --ink:#E7EEF6; --mute:#9AAABC; --line:#2A3A4E;
+    --r:#F28B84; --y:#E5B04A; --g:#62CB98;
+    --rb:#3A2122; --yb:#392E15; --gb:#173226;
+    --acc:#8FAAFF; --accb:#1E2B52;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1822; --grid:#182432; --card:#162130; --ink:#E7EEF6; --mute:#9AAABC; --line:#2A3A4E;
+  --r:#F28B84; --y:#E5B04A; --g:#62CB98;
+  --rb:#3A2122; --yb:#392E15; --gb:#173226;
+  --acc:#8FAAFF; --accb:#1E2B52;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0; font-family:var(--body); color:var(--ink); background-color:var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:32px 32px;
+  line-height:1.5;
+}
+.wrap{max-width:980px; margin:0 auto; padding:28px 18px 64px}
+
+/* hero */
+.hero{display:grid; grid-template-columns:1.05fr 1fr; gap:24px; align-items:center; margin-bottom:22px}
+.hero h1{font-family:var(--head); font-weight:800; font-size:clamp(28px,5vw,44px); line-height:1.05; margin:0 0 12px; letter-spacing:-.02em}
+.hero p{margin:0 0 16px; color:var(--mute); max-width:46ch}
+.score{display:flex; align-items:baseline; gap:12px}
+.score b{font-family:var(--head); font-size:clamp(40px,7vw,60px); font-weight:800; line-height:1}
+.score span{color:var(--mute)}
+.curve{background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:10px}
+.curve svg{display:block; width:100%; height:auto}
+.curve .path{fill:none; stroke:var(--ink); stroke-width:2.5; stroke-linecap:round}
+.curve .guide{stroke:var(--mute); stroke-width:1.2; stroke-dasharray:4 5}
+.curve text{fill:var(--mute); font:500 13px var(--body)}
+.ball{fill:var(--acc); stroke:var(--card); stroke-width:3; transition:transform .7s cubic-bezier(.3,.7,.2,1)}
+@media (prefers-reduced-motion: reduce){ .ball{transition:none} }
+
+/* controls */
+.controls{position:sticky; top:env(safe-area-inset-top,0px); z-index:5; background:var(--bg); border-top:1.5px solid var(--line); border-bottom:1.5px solid var(--line); padding:12px 0; margin-bottom:18px}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px}
+.chip{font:600 14px var(--body); color:var(--ink); background:var(--card); border:1.5px solid var(--line); border-radius:999px; padding:7px 14px; cursor:pointer; display:inline-flex; gap:8px; align-items:center}
+.chip i{width:10px; height:10px; border-radius:50%; display:inline-block}
+.chip small{color:var(--mute); font-weight:500; font-size:13px}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+.chip[aria-pressed="true"] small{color:inherit; opacity:.8}
+.tools{display:flex; flex-wrap:wrap; gap:8px}
+.tools input{flex:1 1 200px; font:400 15px var(--body); color:var(--ink); background:var(--card); border:1.5px solid var(--line); border-radius:10px; padding:9px 12px; min-width:0}
+.btn{font:500 14px var(--body); color:var(--ink); background:transparent; border:1.5px solid var(--line); border-radius:10px; padding:9px 12px; cursor:pointer}
+.btn:hover,.chip:hover{border-color:var(--acc)}
+.chip:focus-visible,.btn:focus-visible,.tools input:focus-visible,summary:focus-visible{outline:3px solid var(--acc); outline-offset:2px}
+
+/* sections */
+.sec{background:var(--card); border:1.5px solid var(--line); border-radius:14px; margin-bottom:12px; overflow:hidden}
+.sec[hidden]{display:none}
+summary{list-style:none; cursor:pointer; padding:14px 16px; display:grid; grid-template-columns:auto 1fr auto; gap:6px 14px; align-items:center}
+summary::-webkit-details-marker{display:none}
+.num{font-family:var(--head); font-weight:800; font-size:22px; width:38px; height:38px; border-radius:10px; display:grid; place-items:center; background:var(--accb); color:var(--acc)}
+.ttl{font-family:var(--head); font-weight:700; font-size:19px; line-height:1.2}
+.ttl small{display:block; font:400 14px var(--body); color:var(--mute); margin-top:2px}
+.meta{display:flex; align-items:center; gap:10px}
+.tag{font:600 12px var(--body); border-radius:6px; padding:3px 8px; white-space:nowrap}
+.tag.r{background:var(--rb); color:var(--r)} .tag.y{background:var(--yb); color:var(--y)} .tag.g{background:var(--gb); color:var(--g)}
+.cnt{font:600 14px var(--body); min-width:42px; text-align:right}
+.bar{grid-column:1/-1; height:5px; border-radius:3px; background:var(--grid); overflow:hidden}
+.bar span{display:block; height:100%; width:0; background:var(--acc); transition:width .4s}
+@media (prefers-reduced-motion: reduce){ .bar span{transition:none} }
+.items{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:6px; padding:4px 16px 16px; border-top:1px dashed var(--line); padding-top:14px}
+.item{display:flex; align-items:center; gap:10px; padding:9px 10px; border:1.5px solid var(--line); border-radius:10px; cursor:pointer; position:relative; background:var(--card)}
+.item[hidden]{display:none}
+.item:hover{border-color:var(--acc)}
+.item input{position:absolute; opacity:0; width:1px; height:1px}
+.box{flex:none; width:20px; height:20px; border-radius:6px; border:2px solid var(--mute); display:grid; place-items:center}
+.box svg{width:12px; height:12px; stroke:#fff; stroke-width:3; fill:none; opacity:0}
+.item input:checked + .box{background:var(--acc); border-color:var(--acc)}
+.item input:checked + .box svg{opacity:1}
+.item input:checked ~ .txt{color:var(--mute); text-decoration:line-through; text-decoration-thickness:1.5px}
+.item input:focus-visible + .box{outline:3px solid var(--acc); outline-offset:2px}
+.txt{flex:1; font-size:15px; line-height:1.3}
+.dot{flex:none; width:9px; height:9px; border-radius:50%}
+.dot.r,.chip i.r{background:var(--r)} .dot.y,.chip i.y{background:var(--y)} .dot.g,.chip i.g{background:var(--g)}
+.empty{text-align:center; color:var(--mute); padding:40px 10px}
+
+@media (max-width:720px){
+  .hero{grid-template-columns:1fr}
+  summary{grid-template-columns:auto 1fr}
+  .meta{grid-column:2}
+  .cnt{text-align:left}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <h1>Data Science va ML uchun matematika</h1>
+      <p>Mavzuni o'zlashtirganingizda belgilang. Taraqqiyot oshgani sari to'p gradient descent kabi minimum tomon pastlab boradi.</p>
+      <div class="score"><b id="pct">0%</b><span id="frac">0 / 0 mavzu</span></div>
+    </div>
+    <div class="curve">
+      <svg viewBox="0 0 600 200" role="img" aria-label="Taraqqiyotni ko'rsatuvchi egri chiziq: to'p minimum tomon pastlaydi">
+        <path id="curvePath" class="path" d=""/>
+        <line class="guide" x1="420" y1="170" x2="420" y2="192"/>
+        <text x="420" y="196" text-anchor="middle" style="display:none">minimum</text>
+        <circle id="ball" class="ball" r="10" cx="0" cy="0"/>
+      </svg>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div class="chips" id="chips"></div>
+    <div class="tools">
+      <input id="q" type="search" placeholder="Mavzu qidirish: masalan, gradient" aria-label="Mavzu qidirish">
+      <button class="btn" id="toggleAll" type="button">Hammasini ochish</button>
+      <button class="btn" id="reset" type="button">Boshidan boshlash</button>
+    </div>
+  </div>
+
+  <main id="list"></main>
+  <div class="empty" id="empty" hidden>Hech narsa topilmadi. Boshqa so'z yoki filtrni sinab ko'ring.</div>
+</div>
+
+<script>
+var TIERS = {
+  r:{name:"Juda muhim"},
+  y:{name:"Keyingi bosqich"},
+  g:{name:"Advanced ML"}
+};
+// item: "matn" yoki ["matn","tier"]
+var DATA = [
+ {t:"Algebra", d:"Formulalarni o'qish va o'zgartirish uchun asos.", tier:"r", items:[
+   "Kasrlar","Darajalar","Ildizlar","Tenglamalar","Tengsizliklar","Logarifmlar","Eksponenta (e<sup>x</sup>)","Algebraik ifodalarni soddalashtirish"]},
+ {t:"Funksiyalar va grafiklar", d:"Model aslida funksiya: kirish beriladi, chiqish olinadi.", tier:"r", items:[
+   "Funksiya tushunchasi","f(x)","Chiziqli funksiya","Kvadratik funksiya","Eksponensial funksiya","Logarifmik funksiya","Grafiklarni o'qish","Funksiya o'zgarishini tushunish"]},
+ {t:"Statistika", d:"Ma'lumotni tavsiflash va undagi qonuniyatni ko'rish.", tier:"r", items:[
+   "Mean","Median","Mode","Minimum / Maximum","Range","Variance","Standard deviation","Percentile","Quartile","Z-score",["Covariance","y"],["Correlation","y"]]},
+ {t:"Ehtimollik", d:"Noaniqlik bilan ishlash tili.", tier:"r", items:[
+   "Probability","Conditional probability","Bayes theorem","Random variable","Expected value",["Probability distributions","y"],["Normal distribution","y"],["Bernoulli distribution","y"],["Binomial distribution","y"]]},
+ {t:"Linear Algebra", d:"Ma'lumot vektor va matritsa ko'rinishida saqlanadi.", tier:"r", items:[
+   "Vektorlar","Vektorlar ustida amallar","Dot product","Vector magnitude","Masofa","Matritsalar","Matrix operations","Matrix multiplication","Transpose",
+   ["Inverse matrix","y"],["Linear equations systems","y"],["Geometrik interpretatsiya","y"],["Projection","y"]]},
+ {t:"Calculus", d:"O'zgarish tezligi: model qanday o'rganishini tushuntiradi.", tier:"r", items:[
+   "Limit","Derivative","Partial derivative","Gradient","Chain rule","Multivariable functions","Gradient interpretation"]},
+ {t:"Optimization", d:"Xatoni kamaytirish: o'rganishning asosiy mexanizmi.", tier:"y", items:[
+   "Loss function","Cost function","Minimum / Maximum",["Gradient descent","r"],["Learning rate","r"],"Local / Global minimum"]},
+ {t:"Machine Learning matematikasi", d:"Birinchi modellar ortidagi matematika.", tier:"y", items:[
+   "Linear Regression","Logistic Regression","Sigmoid function","Decision boundary","SVM asoslari","Distance va similarity","Feature scaling","Normalization","Standardization"]},
+ {t:"Model baholash", d:"Model yaxshi ishlayotganini raqamlar bilan aniqlash.", tier:"r", items:[
+   "MAE","MSE","RMSE","Accuracy","Confusion Matrix","TP / TN / FP / FN","Precision","Recall","F1-score","ROC Curve","AUC"]},
+ {t:"Model va statistika tushunchalari", d:"Modelni to'g'ri sinash va ortiqcha moslashishdan saqlanish.", tier:"y", items:[
+   "Train / Test split","Validation","Cross-validation","Overfitting","Underfitting","Bias","Variance","Bias–Variance Tradeoff","Naive model"]},
+ {t:"Regularization", d:"Model murakkabligini jilovlash.", tier:"y", items:[
+   "L1 Regularization","L2 Regularization","Regularization parameter λ","Feature selection","Model complexity"]},
+ {t:"Keyingi bosqich uchun", d:"Chuqur nazariya va ilg'or usullar.", tier:"g", items:[
+   "Maximum Likelihood","Entropy","Cross-entropy","Information Gain","PCA","Eigenvalues","Eigenvectors","Advanced Probability","Bayesian Statistics"]}
+];
+
+var KEY = "ml-math-roadmap-v1";
+var done = {};
+try { var raw = localStorage.getItem(KEY); if (raw) done = JSON.parse(raw) || {}; } catch(e){ done = {}; }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(done)); } catch(e){} }
+
+var filter = "all", query = "";
+var list = document.getElementById("list");
+var allItems = [];   // {id, tier, el, text, sec}
+var secs = [];
+
+var CHECK = '<svg viewBox="0 0 12 12"><path d="M2 6.5l2.6 2.6L10 3.4"/></svg>';
+
+DATA.forEach(function(s, si){
+  var det = document.createElement("details");
+  det.className = "sec";
+  var sum = document.createElement("summary");
+  sum.innerHTML =
+    '<span class="num">'+(si+1)+'</span>'+
+    '<span class="ttl">'+s.t+'<small>'+s.d+'</small></span>'+
+    '<span class="meta"><span class="tag '+s.tier+'">'+TIERS[s.tier].name+'</span><span class="cnt"></span></span>'+
+    '<span class="bar"><span></span></span>';
+  det.appendChild(sum);
+  var box = document.createElement("div");
+  box.className = "items";
+  var sec = {el:det, cnt:sum.querySelector(".cnt"), bar:sum.querySelector(".bar span"), items:[]};
+  s.items.forEach(function(it, ii){
+    var text = typeof it === "string" ? it : it[0];
+    var tier = typeof it === "string" ? s.tier : it[1];
+    var id = si+"-"+ii;
+    var lab = document.createElement("label");
+    lab.className = "item";
+    var extra = tier !== s.tier ? '<span class="tag '+tier+'">'+TIERS[tier].name+'</span>' : '<span class="dot '+tier+'" title="'+TIERS[tier].name+'"></span>';
+    lab.innerHTML = '<input type="checkbox"><span class="box">'+CHECK+'</span><span class="txt">'+text+'</span>'+extra;
+    var cb = lab.querySelector("input");
+    cb.checked = !!done[id];
+    cb.addEventListener("change", function(){
+      if (cb.checked) done[id] = 1; else delete done[id];
+      save(); update();
+    });
+    box.appendChild(lab);
+    var rec = {id:id, tier:tier, el:lab, cb:cb, text:text.replace(/<[^>]+>/g,"").toLowerCase()};
+    allItems.push(rec); sec.items.push(rec);
+  });
+  det.appendChild(box);
+  list.appendChild(det);
+  secs.push(sec);
+});
+
+/* chips */
+var chipsEl = document.getElementById("chips");
+var chipDefs = [["all","Hammasi"],["r","Juda muhim"],["y","Keyingi bosqich"],["g","Advanced ML"]];
+var chipEls = {};
+chipDefs.forEach(function(c){
+  var b = document.createElement("button");
+  b.type = "button"; b.className = "chip";
+  b.innerHTML = (c[0] === "all" ? "" : '<i class="'+c[0]+'"></i>') + c[1] + ' <small></small>';
+  b.addEventListener("click", function(){ filter = c[0]; update(); });
+  chipsEl.appendChild(b); chipEls[c[0]] = b;
+});
+
+/* curve */
+var MINX = 420, X0 = 40;
+function fy(x){ return 170 - 0.0009*(x-MINX)*(x-MINX); }
+(function(){
+  var d = "";
+  for (var x = 0; x <= 600; x += 10){ d += (x ? "L" : "M") + x + " " + fy(x).toFixed(1) + " "; }
+  document.getElementById("curvePath").setAttribute("d", d);
+})();
+var ball = document.getElementById("ball");
+function moveBall(p){
+  var x = X0 + (MINX - X0) * p;
+  ball.style.transform = "translate(" + x + "px," + fy(x) + "px)";
+}
+
+function update(){
+  var tot = {all:0, r:0, y:0, g:0}, dn = {all:0, r:0, y:0, g:0};
+  allItems.forEach(function(it){
+    tot.all++; tot[it.tier]++;
+    if (it.cb.checked){ dn.all++; dn[it.tier]++; }
+  });
+  Object.keys(chipEls).forEach(function(k){
+    chipEls[k].setAttribute("aria-pressed", String(filter === k));
+    chipEls[k].querySelector("small").textContent = dn[k] + "/" + tot[k];
+  });
+  var p = tot.all ? dn.all / tot.all : 0;
+  document.getElementById("pct").textContent = Math.round(p*100) + "%";
+  document.getElementById("frac").textContent = dn.all + " / " + tot.all + " mavzu";
+  moveBall(p);
+
+  var q = query.trim().toLowerCase();
+  var anyVisible = false;
+  secs.forEach(function(s){
+    var vis = 0, d = 0;
+    s.items.forEach(function(it){
+      var show = (filter === "all" || it.tier === filter) && (!q || it.text.indexOf(q) !== -1);
+      it.el.hidden = !show;
+      if (show) vis++;
+      if (it.cb.checked) d++;
+    });
+    s.el.hidden = vis === 0;
+    if (vis) anyVisible = true;
+    if (q && vis) s.el.open = true;
+    s.cnt.textContent = d + "/" + s.items.length;
+    s.bar.style.width = (100 * d / s.items.length) + "%";
+  });
+  document.getElementById("empty").hidden = anyVisible;
+}
+
+document.getElementById("q").addEventListener("input", function(e){ query = e.target.value; update(); });
+
+var toggleBtn = document.getElementById("toggleAll");
+var allOpen = false;
+toggleBtn.addEventListener("click", function(){
+  allOpen = !allOpen;
+  secs.forEach(function(s){ s.el.open = allOpen; });
+  toggleBtn.textContent = allOpen ? "Hammasini yopish" : "Hammasini ochish";
+});
+
+var resetBtn = document.getElementById("reset"), resetTimer = null;
+resetBtn.addEventListener("click", function(){
+  if (!resetTimer){
+    resetBtn.textContent = "Rostdan o'chirilsinmi?";
+    resetTimer = setTimeout(function(){ resetTimer = null; resetBtn.textContent = "Boshidan boshlash"; }, 3500);
+    return;
+  }
+  clearTimeout(resetTimer); resetTimer = null;
+  resetBtn.textContent = "Boshidan boshlash";
+  done = {}; allItems.forEach(function(it){ it.cb.checked = false; });
+  save(); update();
+});
+
+secs[0].el.open = true;
+update();
+</script>
+<script>if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){navigator.serviceWorker.register('sw.js').catch(function(){});}</script>
+</body>
+</html>
